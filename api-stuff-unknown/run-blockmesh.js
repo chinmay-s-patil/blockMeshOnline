@@ -11,8 +11,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Get OpenFOAM service URL from environment variable
+    // Get OpenFOAM service URL from environment variable or use placeholder
+    // Replace this URL with your ngrok URL after running: ngrok http 8000
     const openfoamUrl = process.env.OPENFOAM_SERVICE_URL || 'http://localhost:8000';
+    
+    console.log(`Calling OpenFOAM service at: ${openfoamUrl}/blockmesh`);
     
     const response = await fetch(`${openfoamUrl}/blockmesh`, {
       method: 'POST',
@@ -23,7 +26,7 @@ export default async function handler(req, res) {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.json().catch(() => ({}));
       return res.status(response.status).json({
         error: errorData.error || 'Failed to run blockMesh',
         output: errorData.output || '',
