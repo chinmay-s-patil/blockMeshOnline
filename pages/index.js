@@ -1,78 +1,199 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+import { useState } from 'react';
+import { Play, Upload, FileText } from 'lucide-react';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+export default function BlockMeshOnline() {
+  const [inputMethod, setInputMethod] = useState('text');
+  const [blockMeshDict, setBlockMeshDict] = useState(`/*--------------------------------*- C++ -*----------------------------------*\\
+| =========                 |                                                 |
+| \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\\\    /   O peration     | Version:  v2312                                 |
+|   \\\\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\\\/     M anipulation  |                                                 |
+\\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+scale   1;
 
-export default function Home() {
+vertices
+(
+    (0 0 0)
+    (1 0 0)
+    (1 1 0)
+    (0 1 0)
+    (0 0 1)
+    (1 0 1)
+    (1 1 1)
+    (0 1 1)
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) (10 10 10) simpleGrading (1 1 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    walls
+    {
+        type wall;
+        faces
+        (
+            (0 4 7 3)
+            (2 6 5 1)
+            (1 5 4 0)
+            (3 7 6 2)
+            (0 3 2 1)
+            (4 5 6 7)
+        );
+    }
+);
+
+// ************************************************************************* //`);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [meshOutput, setMeshOutput] = useState('');
+
+  const handleRunBlockMesh = async () => {
+    setIsProcessing(true);
+    setMeshOutput('Running blockMesh...\n');
+    
+    try {
+      const response = await fetch('/api/run-blockmesh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ blockMeshDict }),
+      });
+      
+      const data = await response.json();
+      setMeshOutput(data.output || 'Mesh generated successfully!');
+    } catch (error) {
+      setMeshOutput(`Error: ${error.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setBlockMeshDict(event.target.result);
+      };
+      reader.readAsText(file);
+    }
+  };
+
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black`}
-    >
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the index.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="flex flex-col h-screen bg-gray-900 text-gray-100">
+      {/* Header */}
+      <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
+        <h1 className="text-2xl font-bold text-blue-400">blockMeshOnline</h1>
+        <p className="text-sm text-gray-400 mt-1">Online blockMesh Editor & Visualizer</p>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Panel - Text Editor */}
+        <div className="flex-1 flex flex-col border-r border-gray-700">
+          <div className="bg-gray-800 px-4 py-2 border-b border-gray-700 flex items-center justify-between">
+            <span className="text-sm font-medium">blockMeshDict</span>
+            <button
+              onClick={handleRunBlockMesh}
+              disabled={isProcessing}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-4 py-2 rounded text-sm font-medium transition-colors"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              <Play size={16} />
+              {isProcessing ? 'Processing...' : 'Run blockMesh'}
+            </button>
+          </div>
+          <textarea
+            value={blockMeshDict}
+            onChange={(e) => setBlockMeshDict(e.target.value)}
+            className="flex-1 bg-gray-900 text-gray-100 p-4 font-mono text-sm resize-none focus:outline-none"
+            spellCheck="false"
+          />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs/pages/getting-started?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Right Panel - Options */}
+        <div className="w-96 flex flex-col bg-gray-800">
+          <div className="px-4 py-3 border-b border-gray-700">
+            <h2 className="text-lg font-semibold">Options</h2>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            {/* Input Method Selection */}
+            <div>
+              <label className="block text-sm font-medium mb-3">Input Method</label>
+              <div className="space-y-2">
+                <button
+                  onClick={() => setInputMethod('text')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    inputMethod === 'text'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  <FileText size={20} />
+                  <span>Text Editor</span>
+                </button>
+                
+                <label
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors ${
+                    inputMethod === 'upload'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  <Upload size={20} />
+                  <span>Upload File</span>
+                  <input
+                    type="file"
+                    accept=".txt,.dict"
+                    onChange={(e) => {
+                      setInputMethod('upload');
+                      handleFileUpload(e);
+                    }}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Output Console */}
+            <div>
+              <label className="block text-sm font-medium mb-3">Console Output</label>
+              <div className="bg-gray-900 rounded-lg p-3 h-64 overflow-y-auto font-mono text-xs">
+                {meshOutput ? (
+                  <pre className="text-green-400 whitespace-pre-wrap">{meshOutput}</pre>
+                ) : (
+                  <span className="text-gray-500">No output yet...</span>
+                )}
+              </div>
+            </div>
+
+            {/* Mesh Visualization Options (placeholder) */}
+            <div>
+              <label className="block text-sm font-medium mb-3">Visualization</label>
+              <div className="bg-gray-700 rounded-lg p-4 text-center text-gray-400 text-sm">
+                Mesh viewer will appear here after running blockMesh
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
