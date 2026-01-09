@@ -11,77 +11,43 @@ export default async function handler(req, res) {
   }
 
   try {
-    // TODO: Call your Python API here
-    // For now, this is a placeholder that simulates the response
+    // Your ngrok URL
+    const openfoamUrl = process.env.OPENFOAM_SERVICE_URL || 'https://charlott-prestigious-malka.ngrok-free.dev';
     
-    // Example of what you'll need to do:
-    // const pythonApiUrl = 'http://your-python-api-url/blockmesh';
-    // const pythonResponse = await fetch(pythonApiUrl, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({ blockMeshDict }),
-    // });
-    // const result = await pythonResponse.json();
+    console.log(`Calling OpenFOAM service at: ${openfoamUrl}/blockmesh`);
     
-    // Simulated response for now
-    const simulatedOutput = `Creating block mesh from
-    "/path/to/case"
-Creating block edges
-No non-planar block faces defined
-Creating topology blocks
-Creating topology patches
+    const response = await fetch(`${openfoamUrl}/blockmesh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true', // Skip ngrok browser warning
+      },
+      body: JSON.stringify({ blockMeshDict }),
+    });
 
-Creating block mesh topology
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return res.status(response.status).json({
+        error: errorData.error || 'Failed to run blockMesh',
+        output: errorData.output || '',
+        success: false
+      });
+    }
 
-Check topology
-
-	Basic statistics
-		Number of internal faces : 0
-		Number of boundary faces : 6
-		Number of defined boundary faces : 6
-		Number of undefined boundary faces : 0
-	Checking patch -> block consistency
-
-Creating block offsets
-Creating merge list (topological search)...
-
-Creating polyMesh from blockMesh
-Creating patches
-Creating cells
-Creating points with scale 1
-    cells: 1000
-    faces: 3000
-    points: 1331
-
-Writing polyMesh
-----------------
-Mesh Information
-----------------
-  boundingBox: (0 0 0) (1 1 1)
-  nPoints: 1331
-  nCells: 1000
-  nFaces: 3000
-  nInternalFaces: 0
-----------------
-Patches
-----------------
-  patch 0 (start: 0 size: 3000) name: walls
-
-End
-`;
-
-    res.status(200).json({ 
-      output: simulatedOutput,
-      success: true 
+    const result = await response.json();
+    
+    res.status(200).json({
+      output: result.output,
+      success: result.success,
+      mesh_info: result.mesh_info || {}
     });
 
   } catch (error) {
-    console.error('Error running blockMesh:', error);
-    res.status(500).json({ 
-      error: 'Failed to run blockMesh',
-      output: error.message 
+    console.error('Error calling OpenFOAM service:', error);
+    res.status(500).json({
+      error: 'Failed to connect to OpenFOAM service',
+      output: error.message,
+      success: false
     });
   }
 }

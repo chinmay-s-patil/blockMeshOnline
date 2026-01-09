@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { Play, Upload, FileText } from 'lucide-react';
 
 export default function BlockMeshOnline() {
+  const router = useRouter();
   const [inputMethod, setInputMethod] = useState('text');
   const [blockMeshDict, setBlockMeshDict] = useState(`/*--------------------------------*- C++ -*----------------------------------*\\
 | =========                 |                                                 |
@@ -61,11 +63,11 @@ boundary
 
 // ************************************************************************* //`);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [meshOutput, setMeshOutput] = useState('');
+  const [error, setError] = useState('');
 
   const handleRunBlockMesh = async () => {
     setIsProcessing(true);
-    setMeshOutput('Running blockMesh...\n');
+    setError('');
     
     try {
       const response = await fetch('/api/run-blockmesh', {
@@ -77,10 +79,15 @@ boundary
       });
       
       const data = await response.json();
-      setMeshOutput(data.output || 'Mesh generated successfully!');
+      
+      // Store the result in localStorage for the results page
+      localStorage.setItem('blockMeshResult', JSON.stringify(data));
+      
+      // Navigate to results page
+      router.push('/results');
+      
     } catch (error) {
-      setMeshOutput(`Error: ${error.message}`);
-    } finally {
+      setError(`Error: ${error.message}`);
       setIsProcessing(false);
     }
   };
@@ -172,23 +179,30 @@ boundary
               </div>
             </div>
 
-            {/* Output Console */}
-            <div>
-              <label className="block text-sm font-medium mb-3">Console Output</label>
-              <div className="bg-gray-900 rounded-lg p-3 h-64 overflow-y-auto font-mono text-xs">
-                {meshOutput ? (
-                  <pre className="text-green-400 whitespace-pre-wrap">{meshOutput}</pre>
-                ) : (
-                  <span className="text-gray-500">No output yet...</span>
-                )}
+            {/* Error Display */}
+            {error && (
+              <div className="bg-red-900/30 border border-red-700 rounded-lg p-4">
+                <p className="text-red-400 text-sm">{error}</p>
               </div>
+            )}
+
+            {/* Info Box */}
+            <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-blue-400 mb-2">Quick Tips</h3>
+              <ul className="text-xs text-gray-400 space-y-1">
+                <li>• Edit the blockMeshDict in the text editor</li>
+                <li>• Or upload your own blockMeshDict file</li>
+                <li>• Click "Run blockMesh" to process the mesh</li>
+                <li>• Results will open in a new page</li>
+              </ul>
             </div>
 
-            {/* Mesh Visualization Options (placeholder) */}
-            <div>
-              <label className="block text-sm font-medium mb-3">Visualization</label>
-              <div className="bg-gray-700 rounded-lg p-4 text-center text-gray-400 text-sm">
-                Mesh viewer will appear here after running blockMesh
+            {/* Status Indicator */}
+            <div className="bg-gray-700 rounded-lg p-4">
+              <h3 className="text-sm font-medium mb-2">Service Status</h3>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span className="text-xs text-gray-400">OpenFOAM Service Connected</span>
               </div>
             </div>
           </div>
