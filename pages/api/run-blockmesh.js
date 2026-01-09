@@ -11,8 +11,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Your ngrok URL
-    const openfoamUrl = process.env.OPENFOAM_SERVICE_URL || 'https://charlott-prestigious-malka.ngrok-free.dev';
+    // Your Hugging Face Space URL
+    const openfoamUrl = process.env.OPENFOAM_SERVICE_URL || 
+      'https://murderouscoder-openfoam-blockmesh-api.hf.space';
     
     console.log(`Calling OpenFOAM service at: ${openfoamUrl}/blockmesh`);
     
@@ -20,7 +21,6 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true', // Skip ngrok browser warning
       },
       body: JSON.stringify({ blockMeshDict }),
     });
@@ -39,7 +39,8 @@ export default async function handler(req, res) {
     res.status(200).json({
       output: result.output,
       success: result.success,
-      mesh_info: result.mesh_info || {}
+      mesh_info: result.mesh_info || {},
+      polymesh: result.polymesh || {}  // Pass through polyMesh data
     });
 
   } catch (error) {
