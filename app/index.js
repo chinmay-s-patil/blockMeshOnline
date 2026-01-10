@@ -1,10 +1,10 @@
 // pages/index.js
 import { useState } from 'react';
 import { Grid3x3 } from 'lucide-react';
-import { DEFAULT_TEMPLATE } from '../constants';
-import { parsePolyMesh } from '../meshParser';
-import { EditorPage } from '../components/EditorPage';
-import { ViewerPage } from '../components/ViewerPage';
+import { DEFAULT_TEMPLATE } from '../components/constants';
+import { parsePolyMesh } from '../components/meshParser';
+import { EditorPage } from '../pages/EditorPage';
+import { ViewerPage } from '../pages/ViewerPage';
 
 const BlockMeshOnline = () => {
   const [page, setPage] = useState('editor'); // 'editor' or 'viewer'
