@@ -1,8 +1,8 @@
-// ViewerPage.jsx
+// pages/components/ViewerPage.jsx
 import { ArrowLeft, Grid3x3 } from 'lucide-react';
-import { MeshViewer3D } from './MeshViewer3D';
+import MeshViewer3D from './MeshViewer3D';
 
-export const ViewerPage = ({ parsedMesh, onBackToEditor }) => {
+const ViewerPage = ({ parsedMesh, onBackToEditor }) => {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
@@ -38,3 +38,5 @@ export const ViewerPage = ({ parsedMesh, onBackToEditor }) => {
     </div>
   );
 };
+
+export default ViewerPage;

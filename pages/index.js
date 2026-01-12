@@ -1,13 +1,12 @@
 // pages/index.js
 import { useState } from 'react';
 import { Grid3x3 } from 'lucide-react';
-import { DEFAULT_TEMPLATE } from '../components/constants';
-import { parsePolyMesh } from '../components/meshParser';
-import { EditorPage } from '../pages/EditorPage';
-import { ViewerPage } from '../pages/ViewerPage';
+import { DEFAULT_TEMPLATE } from './utils/constants';
+import EditorPage from './pages/EditorPage';
+import ViewerPage from './pages/ViewerPage';
 
 const BlockMeshOnline = () => {
-  const [page, setPage] = useState('editor'); // 'editor' or 'viewer'
+  const [page, setPage] = useState('editor');
   const [blockMeshDict, setBlockMeshDict] = useState(DEFAULT_TEMPLATE);
   const [isProcessing, setIsProcessing] = useState(false);
   const [logs, setLogs] = useState('');
@@ -29,9 +28,9 @@ const BlockMeshOnline = () => {
       if (data.success) {
         setLogs(prev => prev + '\n✓ blockMesh completed successfully!\n\n' + data.output);
         
-        const parsed = parsePolyMesh(data.polymesh);
-        if (parsed) {
-          setParsedMesh(parsed);
+        // Use pre-parsed mesh data from the server
+        if (data.parsedMesh) {
+          setParsedMesh(data.parsedMesh);
         } else {
           setLogs(prev => prev + '\n✗ Failed to parse mesh data');
         }
@@ -47,7 +46,6 @@ const BlockMeshOnline = () => {
 
   return (
     <div className="h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-gray-100 flex flex-col">
-      {/* Header */}
       <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-700/50 px-8 py-5 shadow-2xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -62,7 +60,6 @@ const BlockMeshOnline = () => {
             </div>
           </div>
           
-          {/* Page Indicator */}
           <div className="flex items-center gap-3 px-5 py-2.5 bg-slate-800/50 rounded-xl border border-slate-700/50">
             <button
               onClick={() => setPage('editor')}
@@ -91,7 +88,6 @@ const BlockMeshOnline = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <div className="flex-1 overflow-hidden p-8">
         <div className="h-full bg-slate-900/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 shadow-2xl overflow-hidden">
           {page === 'editor' ? (

@@ -1,4 +1,4 @@
-// constants.js
+// pages/utils/constants.js
 
 export const DEFAULT_TEMPLATE = `/*--------------------------------*- C++ -*----------------------------------*\\
 | =========                 |                                                 |

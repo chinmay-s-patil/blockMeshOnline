@@ -1,8 +1,8 @@
-// EditorPage.jsx
+// pages/components/EditorPage.jsx
 import { useState } from 'react';
-import { Play, Upload, FileText, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
+import { Play, FileText, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
 
-export const EditorPage = ({ 
+const EditorPage = ({ 
   blockMeshDict, 
   setBlockMeshDict, 
   onRunBlockMesh, 
@@ -10,20 +10,7 @@ export const EditorPage = ({
   logs,
   onNavigateToViewer
 }) => {
-  const [selectedTemplate, setSelectedTemplate] = useState('template');
   const [showLogs, setShowLogs] = useState(false);
-
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setBlockMeshDict(event.target.result);
-        setSelectedTemplate('upload');
-      };
-      reader.readAsText(file);
-    }
-  };
 
   return (
     <div className="h-full flex flex-col">
@@ -110,3 +97,5 @@ export const EditorPage = ({
     </div>
   );
 };
+
+export default EditorPage;

@@ -1,8 +1,8 @@
-// MeshViewer3D.jsx
+// pages/components/MeshViewer3D.jsx
 import { useEffect, useRef, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 
-export const MeshViewer3D = ({ parsedMesh }) => {
+const MeshViewer3D = ({ parsedMesh }) => {
   const canvasRef = useRef(null);
   const [rotation, setRotation] = useState({ x: -0.5, y: 0.5 });
   const [zoom, setZoom] = useState(1.5);
@@ -262,3 +262,5 @@ export const MeshViewer3D = ({ parsedMesh }) => {
     </div>
   );
 };
+
+export default MeshViewer3D;

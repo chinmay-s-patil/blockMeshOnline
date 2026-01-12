@@ -1,4 +1,4 @@
-// meshParser.js
+// pages/utils/meshParser.js
 
 export const parsePolyMesh = (polymeshData) => {
   if (!polymeshData || !polymeshData.points || !polymeshData.faces) {
