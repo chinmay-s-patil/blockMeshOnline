@@ -72,6 +72,10 @@ export default async function handler(req, res) {
           console.log('Failed to parse points');
         }
       }
+      
+      // Remove the large polymesh raw data to reduce response size
+      // We've already parsed what we need
+      delete result.polymesh;
     }
 
     return res.status(200).json(result);
@@ -202,3 +206,10 @@ function samplePoints(points, maxPoints) {
   
   return sampled;
 }
+
+// Increase API response size limit for mesh data
+export const config = {
+  api: {
+    responseLimit: false,
+  },
+};
