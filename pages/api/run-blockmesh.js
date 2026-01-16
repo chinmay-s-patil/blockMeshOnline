@@ -75,7 +75,7 @@ export default async function handler(req, res) {
       
       // Remove the large polymesh raw data to reduce response size
       // We've already parsed what we need
-      delete result.polymesh;
+      // delete result.polymesh;
     }
 
     return res.status(200).json(result);
